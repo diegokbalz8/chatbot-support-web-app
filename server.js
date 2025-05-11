@@ -32,8 +32,9 @@ app.post('/chat', async (req, res) => {
     });
 
     const data = await response.json();
+    console.log("API raw response:", JSON.stringify(data, null, 2));
 
-    const botReply = data.choices?.[0]?.text || '[No reply]';
+    const botReply = data.choices?.[0]?.message?.content || '[No reply]';
 
     res.json({ reply: botReply });
 
