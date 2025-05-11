@@ -24,10 +24,12 @@ app.post('/chat', async (req, res) => {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        model: "openai/gpt-3.5-turbo",
-        messages: [{ role: "user", content: userMessage }]
-      })
+body: JSON.stringify({
+  model: "anthropic/claude-3-haiku",  // or claude-3-sonnet
+  messages: [
+    { role: "user", content: userMessage }
+  ]
+})
     });
 
     const data = await response.json();
