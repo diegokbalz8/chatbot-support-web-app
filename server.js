@@ -1,25 +1,19 @@
+// server.js
 const express = require('express');
 const cors = require('cors');
-const path = require('path');
+const axios = require('axios'); // Optional, not used in this file unless needed
 require('dotenv').config();
 
 const app = express();
-const apiKey = process.env.OPENROUTER_API_KEY;
-// Log the API key for debugging (remove after confirming)
-console.log('API Key:', apiKey);  // Just for debugging
-
-if (!apiKey) {
-  console.error('API key not found in .env file');
-  process.exit(1);  // Exit the app if no API key is found
-}
-
 app.use(cors());
 app.use(express.json());
 
-// Serve static files from the 'public' directory
-app.use(express.static(path.join(__dirname, 'public')));
+const path = require('path');
+app.use(express.static(path.join(__dirname)));
 
-// Chat endpoint
+const apiKey = process.env.OPENROUTER_API_KEY;
+console.log('API KEY loaded:', apiKey ? '[OK]' : '[MISSING]'); // Debug line
+
 app.post('/chat', async (req, res) => {
   const userMessage = req.body.message;
 
@@ -31,16 +25,15 @@ app.post('/chat', async (req, res) => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: "openai/gpt-3.5-turbo", // or another model you tested with
-        messages: [
-          { role: "user", content: userMessage }
-        ]
+        model: "openai/gpt-3.5-turbo",
+        messages: [{ role: "user", content: userMessage }]
       })
     });
 
     const data = await response.json();
-    const botReply = data?.choices?.[0]?.message?.content ?? '[No reply]';
+    console.log("API raw response:", JSON.stringify(data, null, 2));
 
+    const botReply = data?.choices?.[0]?.message?.content ?? '[No reply or invalid response]';
     res.json({ reply: botReply });
 
   } catch (error) {
