@@ -1,18 +1,25 @@
-// server.js
 const express = require('express');
 const cors = require('cors');
-const axios = require('axios');
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
+const apiKey = process.env.OPENROUTER_API_KEY;
+// Log the API key for debugging (remove after confirming)
+console.log('API Key:', apiKey);  // Just for debugging
+
+if (!apiKey) {
+  console.error('API key not found in .env file');
+  process.exit(1);  // Exit the app if no API key is found
+}
+
 app.use(cors());
 app.use(express.json());
 
-const path = require('path');
-app.use(express.static(path.join(__dirname)));
+// Serve static files from the 'public' directory
+app.use(express.static(path.join(__dirname, 'public')));
 
-const apiKey = process.env.OPENROUTER_API_KEY;
-
+// Chat endpoint
 app.post('/chat', async (req, res) => {
   const userMessage = req.body.message;
 
@@ -32,9 +39,7 @@ app.post('/chat', async (req, res) => {
     });
 
     const data = await response.json();
-    console.log("API raw response:", JSON.stringify(data, null, 2));
-
-    const botReply = data.choices?.[0]?.message?.content || '[No reply]';
+    const botReply = data?.choices?.[0]?.message?.content ?? '[No reply]';
 
     res.json({ reply: botReply });
 
@@ -43,7 +48,6 @@ app.post('/chat', async (req, res) => {
     res.status(500).json({ reply: '[Error contacting AI service]' });
   }
 });
-
 
 app.listen(3000, () => {
   console.log('Server running at http://localhost:3000');
